@@ -6865,11 +6865,63 @@ local v2741 = {
                         v1443.ScrollDownEvent:Disconnect();
                         v1443.ScrollDownEvent = nil;
                     end;
+                    if v1443.ScrollTouchBegin then
+                        v1443.ScrollTouchBegin:Disconnect();
+                        v1443.ScrollTouchBegin = nil;
+                    end;
+                    if v1443.ScrollTouchChange then
+                        v1443.ScrollTouchChange:Disconnect();
+                        v1443.ScrollTouchChange = nil;
+                    end;
+                    if v1443.ScrollTouchEnd then
+                        v1443.ScrollTouchEnd:Disconnect();
+                        v1443.ScrollTouchEnd = nil;
+                    end;
                     v1443.ScrollUpEvent = v1444.MouseWheelForward:Connect(function() --[[ Line: 5402 ]]
                         v1443:ScrollTo(v1443.Index - v1443.WheelIncrement);
                     end);
                     v1443.ScrollDownEvent = v1444.MouseWheelBackward:Connect(function() --[[ Line: 5403 ]]
                         v1443:ScrollTo(v1443.Index + v1443.WheelIncrement);
+                    end);
+                    local v1445 = nil;
+                    local v1446 = nil;
+                    v1443.ScrollTouchBegin = v1444.InputBegan:Connect(function(v1447) --[[ Line: 5406 ]]
+                        if v1447.UserInputType == Enum.UserInputType.Touch then
+                            v1445 = v1447;
+                            v1446 = {
+                                Pos = v1447.Position, 
+                                Index = v1443.Index
+                            };
+                        end;
+                    end);
+                    v1443.ScrollTouchChange = v1444.InputChanged:Connect(function(v1448) --[[ Line: 5415 ]]
+                        if v1448.UserInputType ~= Enum.UserInputType.Touch then
+                            return;
+                        end;
+                        if not v1446 or (v1445 and v1448 ~= v1445) then
+                            return;
+                        end;
+                        local v1449 = v1443.Horizontal and "X" or "Y";
+                        local v1450 = v1444.AbsoluteSize[v1449];
+                        local v1451 = math.max(0, v1443.TotalSpace - v1443.VisibleSpace);
+                        if v1450 <= 0 or v1451 <= 0 then
+                            return;
+                        end;
+                        local v1452 = v1448.Position[v1449] - v1446.Pos[v1449];
+                        local v1453 = v1450 / v1451;
+                        if v1453 <= 0 then
+                            return;
+                        end;
+                        local v1454 = math.floor(v1446.Index - v1452 / v1453 + 0.5);
+                        if v1454 ~= v1443.Index then
+                            v1443:ScrollTo(v1454);
+                        end;
+                    end);
+                    v1443.ScrollTouchEnd = v1444.InputEnded:Connect(function(v1455) --[[ Line: 5437 ]]
+                        if v1455.UserInputType == Enum.UserInputType.Touch and (not v1445 or v1455 == v1445) then
+                            v1445 = nil;
+                            v1446 = nil;
+                        end;
                     end);
                 end;
                 local v1445 = {
