@@ -1,9 +1,7 @@
--- PlayerGui 실시간 리스트 UI
+-- PlayerGui 실시간 리스트 UIddd
 -- 드래그 가능, X 버튼으로 닫기
 
 local Players = game:GetService("Players")
-local GuiService = game:GetService("GuiService")
-local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
 local playerGui = localPlayer:WaitForChild("PlayerGui")
 
@@ -12,38 +10,9 @@ screenGui.Name = "PlayerGuiListUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- 화면 크기 감지 및 반응형 크기 설정
-local function getScreenSize()
-    local screenSize = workspace.CurrentCamera.ViewportSize
-    return screenSize
-end
-
--- 모바일 감지 (더 정확한 방법)
-local function isMobile()
-    local screenSize = getScreenSize()
-    -- 화면 비율이나 크기로 판단 (모바일은 보통 세로가 더 길거나 작은 화면)
-    local isSmallScreen = screenSize.X < 800 or screenSize.Y < 600
-    local hasTouch = UserInputService.TouchEnabled
-    local noKeyboard = not UserInputService.KeyboardEnabled
-    
-    -- 터치 가능하고 키보드가 없거나, 화면이 작으면 모바일로 간주
-    return (hasTouch and noKeyboard) or (isSmallScreen and hasTouch)
-end
-
-local screenSize = getScreenSize()
-local isMobileDevice = isMobile()
-
--- 모바일과 데스크톱에 따라 다른 크기 설정
-local mainWidth, mainHeight
-if isMobileDevice then
-    -- 모바일: 화면의 90% 너비, 80% 높이
-    mainWidth = screenSize.X * 0.9
-    mainHeight = screenSize.Y * 0.8
-else
-    -- 데스크톱: 고정 크기
-    mainWidth = 400
-    mainHeight = 500
-end
+-- 작은 고정 크기 (모바일과 데스크톱 모두 동일)
+local mainWidth = 300
+local mainHeight = 400
 
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, mainWidth, 0, mainHeight)
@@ -53,20 +22,9 @@ main.BorderSizePixel = 0
 main.Parent = screenGui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
--- 화면 크기 변경 시 자동 조절
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-    screenSize = getScreenSize()
-    if isMobileDevice then
-        mainWidth = screenSize.X * 0.9
-        mainHeight = screenSize.Y * 0.8
-        main.Size = UDim2.new(0, mainWidth, 0, mainHeight)
-        main.Position = UDim2.new(0.5, -mainWidth/2, 0.5, -mainHeight/2)
-    end
-end)
-
 -- 드래그 기능을 위한 타이틀 바
 local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 titleBar.BorderSizePixel = 0
@@ -81,20 +39,19 @@ title.BackgroundTransparency = 1
 title.Text = "PlayerGui Items"
 title.TextColor3 = Color3.fromRGB(0, 255, 150)
 title.Font = Enum.Font.GothamBold
-title.TextSize = isMobileDevice and 16 or 14
+title.TextSize = 12
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- X 버튼 크기 (모바일에서 더 크게)
-local closeBtnSize = isMobileDevice and 36 or 30
+-- X 버튼
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, closeBtnSize, 0, closeBtnSize)
-closeBtn.Position = UDim2.new(1, -(closeBtnSize + 5), 0, 2)
+closeBtn.Size = UDim2.new(0, 28, 0, 28)
+closeBtn.Position = UDim2.new(1, -33, 0, 3)
 closeBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 closeBtn.Text = "X"
 closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = isMobileDevice and 16 or 14
+closeBtn.TextSize = 12
 closeBtn.Parent = titleBar
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
 
@@ -108,8 +65,8 @@ end)
 
 -- 리스트 프레임
 local listFrame = Instance.new("ScrollingFrame")
-listFrame.Size = UDim2.new(1, -20, 1, -50)
-listFrame.Position = UDim2.new(0, 10, 0, 45)
+listFrame.Size = UDim2.new(1, -20, 1, -40)
+listFrame.Position = UDim2.new(0, 10, 0, 38)
 listFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 listFrame.BorderSizePixel = 0
 listFrame.ScrollBarThickness = 6
@@ -164,38 +121,35 @@ end)
 
 -- 아이템 표시 함수
 local function createItemEntry(item)
-    local entryHeight = isMobileDevice and 60 or 50
     local entry = Instance.new("Frame")
-    entry.Size = UDim2.new(1, 0, 0, entryHeight)
+    entry.Size = UDim2.new(1, 0, 0, 45)
     entry.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     entry.BorderSizePixel = 0
     entry.Parent = listFrame
     Instance.new("UICorner", entry).CornerRadius = UDim.new(0, 6)
     
     -- 아이템 이름
-    local nameLabelHeight = isMobileDevice and 24 or 20
     local nameLabel = Instance.new("TextLabel")
-    nameLabel.Size = UDim2.new(1, -10, 0, nameLabelHeight)
-    nameLabel.Position = UDim2.new(0, 5, 0, 5)
+    nameLabel.Size = UDim2.new(1, -10, 0, 18)
+    nameLabel.Position = UDim2.new(0, 5, 0, 4)
     nameLabel.BackgroundTransparency = 1
     nameLabel.Text = item.Name
     nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     nameLabel.Font = Enum.Font.GothamBold
-    nameLabel.TextSize = isMobileDevice and 14 or 12
+    nameLabel.TextSize = 11
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
     nameLabel.Parent = entry
     
     -- 클래스명
-    local classLabelHeight = isMobileDevice and 22 or 18
     local classLabel = Instance.new("TextLabel")
-    classLabel.Size = UDim2.new(1, -10, 0, classLabelHeight)
-    classLabel.Position = UDim2.new(0, 5, 0, isMobileDevice and 30 or 25)
+    classLabel.Size = UDim2.new(1, -10, 0, 16)
+    classLabel.Position = UDim2.new(0, 5, 0, 22)
     classLabel.BackgroundTransparency = 1
     classLabel.Text = "Class: " .. item.ClassName
     classLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
     classLabel.Font = Enum.Font.Gotham
-    classLabel.TextSize = isMobileDevice and 12 or 10
+    classLabel.TextSize = 9
     classLabel.TextXAlignment = Enum.TextXAlignment.Left
     classLabel.TextTruncate = Enum.TextTruncate.AtEnd
     classLabel.Parent = entry
