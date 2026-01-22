@@ -1,4 +1,4 @@
--- List PlayerGui contents (top-level ScreenGuis and all descendants).
+-- List PlayerGui contents (top-level ScreenGuis and all descendants).ddddd
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -53,7 +53,15 @@ local function outputToFile(text)
 end
 
 local function outputToGui(text)
-    local existing = playerGui:FindFirstChild(outputGuiName)
+    local parentGui = playerGui
+    if type(gethui) == "function" then
+        local ok, hui = pcall(gethui)
+        if ok and hui then
+            parentGui = hui
+        end
+    end
+
+    local existing = parentGui:FindFirstChild(outputGuiName)
     if existing then
         existing:Destroy()
     end
@@ -61,7 +69,9 @@ local function outputToGui(text)
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = outputGuiName
     screenGui.ResetOnSpawn = false
-    screenGui.Parent = playerGui
+    screenGui.IgnoreGuiInset = true
+    screenGui.DisplayOrder = 999999
+    screenGui.Parent = parentGui
 
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0.9, 0, 0.7, 0)
@@ -91,22 +101,35 @@ local function outputToGui(text)
     closeBtn.TextSize = 12
     closeBtn.Parent = frame
 
-    local box = Instance.new("TextBox")
-    box.Size = UDim2.new(1, -20, 1, -48)
-    box.Position = UDim2.new(0, 10, 0, 38)
-    box.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    box.BorderSizePixel = 0
-    box.ClearTextOnFocus = false
-    box.MultiLine = true
-    box.TextEditable = false
-    box.TextXAlignment = Enum.TextXAlignment.Left
-    box.TextYAlignment = Enum.TextYAlignment.Top
-    box.TextWrapped = false
-    box.Font = Enum.Font.Code
-    box.TextSize = 12
-    box.TextColor3 = Color3.new(1, 1, 1)
-    box.Text = text
-    box.Parent = frame
+    local scroll = Instance.new("ScrollingFrame")
+    scroll.Size = UDim2.new(1, -20, 1, -48)
+    scroll.Position = UDim2.new(0, 10, 0, 38)
+    scroll.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    scroll.BorderSizePixel = 0
+    scroll.ScrollBarThickness = 6
+    scroll.Parent = frame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -8, 0, 0)
+    label.Position = UDim2.new(0, 4, 0, 4)
+    label.BackgroundTransparency = 1
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Top
+    label.TextWrapped = false
+    label.Font = Enum.Font.GothamMono
+    label.TextSize = 12
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.Text = text
+    label.Parent = scroll
+
+    local textSize = game:GetService("TextService"):GetTextSize(
+        label.Text,
+        label.TextSize,
+        label.Font,
+        Vector2.new(scroll.AbsoluteSize.X - 8, math.huge)
+    )
+    label.Size = UDim2.new(1, -8, 0, textSize.Y)
+    scroll.CanvasSize = UDim2.new(0, 0, 0, textSize.Y + 8)
 
     closeBtn.MouseButton1Click:Connect(function()
         screenGui:Destroy()
